@@ -6,7 +6,7 @@
 # Credits: MarcoDT (testing, trouble-shooting, guidance).  Keith (N7ACW) (inspiration).  Jason (KM4ACK) (inspiration).
 # Version: 0.2 (June 10, 2024)
 # Description: Install pre-requisites for building Artemis on Linux within a pyenv, then build Artemis from source
-# We need to install Artemis' pip requirements.  To build a compact Artemis exe, we should build within a fresh python environment.
+# Details: We might need to install Artemis' pip requirements on a system that uses Python to run its OS.  To build an Artemis binary, we should build within a fresh python virtual environment.
 
 clear
 echo "======= Build Artemis for Linux ======="
@@ -19,7 +19,7 @@ read -n 1 -s -r -p "Press any key to continue (more instructions to follow) ..."
 clear
 
 ### User-defined variables
-PYTHVER='3.12.4' # Specify a version of Python to install into your PyEnv virtual environment (to build Artemis from).
+PYTHVER='3.11.0' # Specify a version of Python to install into your PyEnv virtual environment (to build Artemis from).
 
 ### Static Variables
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # Store current location of this bash script
@@ -97,15 +97,17 @@ sudo chmod +x build_linux.sh
 # Tried original build parameters (gcc 12): ./app.bin returns "Segmentation fault"
 # Tried use LTO compilation (add --lto=yes to build_linux.sh) (gcc 12): "Segmentation fault"
 # Tried original build parameters (clang): "Segmentation fault"
-# Sources : https://stackoverflow.com/questions/35163523/script-compiled-with-nuitka-raises-segmentation-fault
+# Sources : 
 # Tried original build parameters (gcc 12) [sudo apt remove gcc && sudo apt install gcc-11 && sudo ln -s /usr/bin/gcc-11 /usr/bin/gcc]: "Segmentation fault"
-
 
 ### NOTES ON BUILDING ON DEBIAN X64 ### python3.12.4
 # Tried original build parameters (gcc 11): SUCCESS
 # Tried original build parameters + LTO compilation (add --lto=yes to build_linux.sh): "Segmentation fault"
 # Tried original build parameters + --clang (clang 14.0.0-1ubuntu1.1): "Segmentation fault (core dumped)"
 # Tried --onefile (instead of --standalone): doesn't run, not terminal output
+
+### NOTES ON BUILDING ON RPI ### python3.11.0
+# Tried original build parameters (gcc 11): SUCCESS
 
 # Zip contents of our Artemis build folder for distribution
 7z a -r Artemis-Linux-ARM64-4.0.3.7z app.dist\*
@@ -128,22 +130,14 @@ echo
 read -p "Would you like to remove the build pre-requisites we installed? (y/n) `echo $'\n '`(Removing these files will free up about 200 MB, but keeping the files will make re-running this script take much less time.  We will not delete PyEnv which is another 200 MB, but you can delete its folder manually to remove it if you like.) `echo $'\n> '`" REMOVEFILES
 if [ $REMOVEFILES = "y" ] || [ $REMOVEFILES = "Y" ]; then
     rm -rf app.dist/ app.build/
-    sudo rm -rf ${HOME}/.pyenv/versions/${BUILDENV}/ ${HOME}/.pyenv/versions/${PYTHVER}/envs/${BUILDENV}/
+    rm -rf ${HOME}/.pyenv/versions/${BUILDENV}/ ${HOME}/.pyenv/versions/${PYTHVER}/envs/${BUILDENV}/
 fi
 
 ######################################### Notes #########################################
 ### Other Resources
 # Python Virtual Environments https://www.youtube.com/watch?v=N5vscPTWKOk
 # Python VirtEnv reduces built EXE file sizes https://stackoverflow.com/questions/47692213/reducing-size-of-pyinstaller-exe
-# Setuptools error: "ModuleNotFoundError: No module named 'pkg_resources.py2_warn'" https://github.com/pypa/setuptools/issues/1963
-# Trouble-shooting pyinstaller https://github.com/pyinstaller/pyinstaller/wiki/How-to-Report-Bugs#make-sure-everything-is-packaged-correctly
-# Using pyinstaller with venv: https://pyinstaller.readthedocs.io/en/stable/development/venv.html
-# Learning Pyenv https://realpython.com/intro-to-pyenv/
-# Search Debian apt-get repo for missing packages https://www.debian.org/distrib/packages#search_contents
-# https://www.cyberciti.biz/faq/howto-check-if-a-directory-exists-in-a-bash-shellscript/
-# https://pyinstaller.readthedocs.io/en/stable/development/venv.html
-# https://stackoverflow.com/questions/16931244/checking-if-output-of-a-command-contains-a-certain-string-in-a-shell-script
-# PyQt5 build instructions: https://www.riverbankcomputing.com/static/Docs/PyQt5/building_with_configure.html
+# Nuitka built apps "Segmentation fault" https://stackoverflow.com/questions/35163523/script-compiled-with-nuitka-raises-segmentation-fault
 
 ### Other commands
 #python -V # You can test which version of python has priority now on your system if you like
