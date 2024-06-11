@@ -91,15 +91,13 @@ sudo apt install -y ccache # nuitka-recommended package to speed up re-compilati
 pyenv activate $BUILDENV 
 cp building/Linux/build_linux.sh .
 sudo chmod +x build_linux.sh
-./build_linux.sh
+./build_linux.sh # can try modifying nuitka build parameters here
 
 # Zip contents of our Artemis build folder for distribution
-cd app.dist
-7z a -r ../Artemis-Linux-x86_64-4.0.3.7z *
-7z a -tzip -r ../Artemis-Linux-x86_64-4.0.3.zip *
-cd ..
+7z a -r Artemis-Linux-x86_64-4.0.3.7z app.dist\*
+7z a -tzip -r Artemis-Linux-x86_64-4.0.3.zip app.dist\*
 
-# Install some Artemis 4 runtime dependencies
+# Install some Artemis 4 runtime dependencies (avoid "Segmentation fault" on run of "./app.bin")
 sudo apt install -y libxcb-cursor0 libva-dev
 
 TEND=`date +%s` # Log the end time of the script
@@ -115,10 +113,8 @@ pyenv global system # Set the active Python version back to System Python (inste
 echo
 read -p "Would you like to remove the build pre-requisites we installed? (y/n) `echo $'\n '`(Removing these files will free up about 200 MB, but keeping the files will make re-running this script take much less time.  We will not delete PyEnv which is another 200 MB, but you can delete its folder manually to remove it if you like.) `echo $'\n> '`" REMOVEFILES
 if [ $REMOVEFILES = "y" ] || [ $REMOVEFILES = "Y" ]; then
-    rm -rf ~/Downloads/Artemis/app.build
-    rm -rf ~/Downloads/Artemis/app.dist
-    sudo rm -rf /home/pi/.pyenv/versions/$BUILDENV
-    sudo rm -rf /home/pi/.pyenv/versions/$PYTHVER/envs/$BUILDENV
+    rm -rf app.dist/ app.build/
+    sudo rm -rf ${HOME}/.pyenv/versions/${BUILDENV}/ ${HOME}/.pyenv/versions/${PYTHVER}/envs/${BUILDENV}/
 fi
 
 ######################################### Notes #########################################
