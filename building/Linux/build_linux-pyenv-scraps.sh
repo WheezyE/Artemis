@@ -35,7 +35,7 @@ sudo apt-get upgrade -y
 sudo apt install libxcb-cursor0 libva-dev # needed to run Artemis 4
 
 ######################################### Install PyEnv #########################################
-### Install pyenv so we can build Artemis from a fresh virtual Python (apart from Raspbian's System Python)
+### Install pyenv so we can build Artemis from a fresh virtual Python (apart from any System Python setup which might be configured to run part of a Linux OS)
 
 export PYENV_ROOT="$HOME/.pyenv" # Needed to help this if statement find PyEnv if it's already installed.
 export PATH="$PYENV_ROOT/bin:$PATH" # Both of these exports are also needed later in this script.
@@ -58,15 +58,14 @@ eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
 
-######################################### Install Python 3.x.x Inside Pyenv #########################################
-### We will install our Artemis requirements pip modules inside of this virtualenv.
+### Install Python 3.x.x & pip modules Inside Pyenv/virtualenv
+sudo apt-get install -y make build-essential libssl-dev zlib1g-dev \
+libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
+libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev openssl
 
 # Check to see if Python 3.x.x is already installed in pyenv.  If so, skip Python 3.x.x installation.
 if ! [ -d "/$HOME/.pyenv/versions/$PYTHVER/" ]; then
     echo "Installing Python" $PYTHVER "within Pyenv now..." >&2
-    sudo apt-get install -y make build-essential libssl-dev zlib1g-dev \
-    libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
-    libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl
     env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install -v $PYTHVER
 else
     echo "Python" $PYTHVER "is already installed within Pyenv, skipping Python installation..." >&2
@@ -83,7 +82,7 @@ else
 fi
 
 
-###################################### Install Artemis Requirements Into Our Pyenv ######################################
+###################################### Build Artemis With Our Pyenv ######################################
 pyenv activate $BUILDENV # Activate the new Python 3.x.x virtualenv so we can start installing python pip modules in it
 cp building/Linux/build_linux.sh .
 sudo chmod +x build_linux.sh
