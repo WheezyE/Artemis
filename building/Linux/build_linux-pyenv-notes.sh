@@ -91,11 +91,25 @@ sudo apt install -y ccache # nuitka-recommended package to speed up re-compilati
 pyenv activate $BUILDENV 
 cp building/Linux/build_linux.sh .
 sudo chmod +x build_linux.sh
-./build_linux.sh # can try modifying nuitka build parameters here
+./build_linux.sh # can try modifying nuitka build parameters here to get build to run
+
+### NOTES ON BUILDING ON RPI ### python3.12.4
+# Tried original build parameters (gcc 12): ./app.bin returns "Segmentation fault"
+# Tried use LTO compilation (add --lto=yes to build_linux.sh) (gcc 12): "Segmentation fault"
+# Tried original build parameters (clang): "Segmentation fault"
+# Sources : https://stackoverflow.com/questions/35163523/script-compiled-with-nuitka-raises-segmentation-fault
+# Tried original build parameters (gcc 12) [sudo apt remove gcc && sudo apt install gcc-11 && sudo ln -s /usr/bin/gcc-11 /usr/bin/gcc]: "Segmentation fault"
+
+
+### NOTES ON BUILDING ON DEBIAN X64 ### python3.12.4
+# Tried original build parameters (gcc 11): SUCCESS
+# Tried original build parameters + LTO compilation (add --lto=yes to build_linux.sh): "Segmentation fault"
+# Tried original build parameters + --clang (clang 14.0.0-1ubuntu1.1): "Segmentation fault (core dumped)"
+# Tried --onefile (instead of --standalone): doesn't run, not terminal output
 
 # Zip contents of our Artemis build folder for distribution
-7z a -r Artemis-Linux-x86_64-4.0.3.7z app.dist\*
-7z a -tzip -r Artemis-Linux-x86_64-4.0.3.zip app.dist\*
+7z a -r Artemis-Linux-ARM64-4.0.3.7z app.dist\*
+7z a -tzip -r Artemis-Linux-ARM64-4.0.3.zip app.dist\*
 
 # Install some Artemis 4 runtime dependencies (avoid "Segmentation fault" on run of "./app.bin")
 sudo apt install -y libxcb-cursor0 libva-dev
