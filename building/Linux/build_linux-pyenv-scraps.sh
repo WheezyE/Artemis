@@ -32,6 +32,8 @@ exec > >(tee "$DIR/raspbian_build_debug.log") 2>&1 # Make a log of this script's
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
+sudo apt install libxcb-cursor0 libva-dev # needed to run Artemis 4
+
 ######################################### Install PyEnv #########################################
 ### Install pyenv so we can build Artemis from a fresh virtual Python (apart from Raspbian's System Python)
 
