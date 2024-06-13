@@ -31,6 +31,8 @@ python -m nuitka app.py \
   --force-stderr-spec="{TEMP}/artemis.err.log" \
   --force-stdout-spec="{TEMP}/artemis.out.log"
 
+echo "Building Linux target finished."
+
 chmod 755 app.bin
 chmod 755 create_shortcut.sh
 
@@ -41,5 +43,3 @@ cp -r images ./app.onefile-dist/images
 cp LICENSE ./app.onefile-dist/LICENSE
 cp README.md ./app.onefile-dist/README.md
 cp CHANGELOG.md ./app.onefile-dist/CHANGELOG.md
-
-echo "Building Linux target finished."
