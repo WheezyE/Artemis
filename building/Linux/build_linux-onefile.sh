@@ -30,7 +30,7 @@ python -m nuitka app.py \
   --force-stderr-spec="{TEMP}/artemis.err.log" \
   --force-stdout-spec="{TEMP}/artemis.out.log"
 
-chmod 755 ./app.dist/app.bin
+#chmod 755 ./app.dist/app.bin
 chmod 755 app.bin
 chmod 755 create_shortcut.sh
 
