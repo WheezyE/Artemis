@@ -7,7 +7,7 @@
 # Version: 0.2 (June 10, 2024)
 # Description: Install pre-requisites for building Artemis on Linux within a pyenv, then build Artemis from source
 # Details: We might need to install Artemis' pip requirements on a system that uses Python to run its OS.  To build an Artemis binary, we should build within a fresh python virtual environment.
-
+# Last built successfully on RPi4 (Raspberry Pi 4 Model B Rev 1.2, Debian GNU/Linux 12/bookworm aarch64, kernel 6.6.31+rpt-rpi-v8) with gcc-11 (Debian 11.3.0-12) 11.3.0, python 3.11.0 inside pyenv.
 clear
 echo "======= Build Artemis for Linux ======="
 echo
