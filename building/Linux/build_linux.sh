@@ -9,6 +9,7 @@ pip install nuitka==2.3
 echo "Building with Nuitka ..."
 python -m nuitka app.py \
   --standalone \
+  --onefile \
   --follow-imports \
   --show-modules \
   --assume-yes-for-downloads \
@@ -24,11 +25,13 @@ python -m nuitka app.py \
   --include-qt-plugins=multimedia \
   --include-data-files=./artemis/resources.py=./artemis/resources.py \
   --include-data-files=./config/qtquickcontrols2.conf=./config/qtquickcontrols2.conf \
-  --include-data-files=./building/Linux/create_shortcut.sh=./create_shortcut.sh \
+  #--include-data-files=./building/Linux/create_shortcut.sh=./create_shortcut.sh \
   --include-data-files=./images/artemis_icon.svg=./images/artemis_icon.svg \
   --force-stderr-spec="{TEMP}/artemis.err.log" \
   --force-stdout-spec="{TEMP}/artemis.out.log"
 
-chmod 755 ./app.dist/app.bin
+#chmod 755 ./app.dist/app.bin
+chmod 755 app.bin
+cp building/Linux/create_shortcut.sh create_shortcut.sh
 
 echo "Building Linux target finished."
