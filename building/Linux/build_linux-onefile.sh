@@ -19,6 +19,7 @@ python -m nuitka app.py \
   --noinclude-dlls=libQt6Sensors* \
   --noinclude-dlls=libQt6Test* \
   --noinclude-dlls=libQt6WebEngine* \
+  --noinclude-dlls=zshare* \
   --include-qt-plugins=sensible \
   --include-qt-plugins=styles \
   --include-qt-plugins=qml \
