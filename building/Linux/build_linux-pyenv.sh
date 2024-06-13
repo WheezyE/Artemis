@@ -11,11 +11,11 @@
 clear
 echo "======= Build Artemis for Linux ======="
 echo
-echo "This script will help you build distributable Artemis executable binaries Linux."
+echo "This script will help you build distributable Artemis executable binaries for Linux."
 echo
-echo "We will prepare a virtual python environment, then make your Artemis binary."
+echo "We will prepare a virtual python environment, download the Artemis repo, then make your Artemis binary."
 echo
-read -n 1 -s -r -p "Press any key to continue (more instructions to follow) ..."
+read -n 1 -s -r -p "Press any key to continue ..."
 clear
 
 ### User-defined variables
@@ -27,7 +27,7 @@ BUILDENV="artemis3_python"$PYTHVER
 TSTART=`date +%s` # log this script's start time
 
 exec > >(tee "$DIR/build_linux-pyenv_debug.log") 2>&1 # log this script's output
-sudo apt-get update -y && sudo apt-get upgrade -y
+sudo apt update -y && sudo apt upgrade -y
 
 ######################################### Install PyEnv #########################################
 ### Install pyenv so we can build Artemis from a fresh virtual Python (apart from any System Python setup which might be configured to run part of a Linux OS)
@@ -54,7 +54,7 @@ eval "$(pyenv virtualenv-init -)"
 
 
 ### Install Python 3.x.x & pip modules Inside Pyenv/virtualenv
-sudo apt-get install -y make build-essential libssl-dev zlib1g-dev \
+sudo apt install -y make build-essential libssl-dev zlib1g-dev \
 libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
 libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev openssl
 
@@ -66,10 +66,11 @@ else
     echo "Python" $PYTHVER "is already installed within Pyenv, skipping Python installation..." >&2
 fi
 pyenv global $PYTHVER # Make your python 3.x.x environment the default whenever "python" is typed (instead of System python)
+python -m pip install --upgrade pip # upgrade pip
 
 ### Create our new python virtual environment using Python 3.x.x (we will activate it as soon as we need it)
-# Check to see if we've already made a Python 3.x.x virtual environment named (for example) 'artemis3_py3.7.0_pyqtnew'
 if ! [ -d "/$HOME/.pyenv/versions/$PYTHVER/envs/$BUILDENV" ]; then
+    # check to see if we've already made a Python 3.x.x virtual environment named (for example) 'artemis3_py3.11.0'
     echo 'Creating a Python' $PYTHVER 'virtual environment named' $BUILDENV '...' >&2
     pyenv virtualenv $PYTHVER $BUILDENV
 else
@@ -88,7 +89,7 @@ sudo apt install -y patchelf # needed to build '--standalone' with nuitka
 sudo apt install -y ccache # nuitka-recommended package to speed up re-compilation of identical code
 
 # Install Artemis build dependencies (pip modules) inside of our new Python 3.x.x virtualenv, then build Artemis
-pyenv activate $BUILDENV 
+pyenv activate $BUILDENV
 cp building/Linux/build_linux.sh .
 sudo chmod +x build_linux.sh
 ./build_linux.sh # can try modifying nuitka build parameters here to get build to run
@@ -120,13 +121,19 @@ TEND=`date +%s` # Log the end time of the script
 TTOTAL=$((TEND-TSTART))
 echo '(Script completed in' $TTOTAL 'seconds)' # Report how long it took to install requirements and build Artemis
 
+echo
+echo "WARNING: Nuitka sometimes fails if using a version of gcc that is too new. Last successful Artemis build was with gcc-11 and python3.11.0."
+echo "If your Artemis binary does not start, try manually installing gcc-11 (then symlink gcc-11 as 'gcc') or a different version of python in your virtualenv. Then run:"
+echo "pyenv activate $BUILDENV"
+echo "and re-run the build_linux.sh script."
+read -n 1 -s -r -p "Press any key to continue ..."
+echo
 
 ######################################### Clean Up #########################################
 
 pyenv deactivate # The virtualenv may also be deactivated when we close the terminal window
 pyenv global system # Set the active Python version back to System Python (instead of PyEnv Python 3.7.x)
 
-echo
 read -p "Would you like to remove the build pre-requisites we installed? (y/n) `echo $'\n '`(Removing these files will free up about 200 MB, but keeping the files will make re-running this script take much less time.  We will not delete PyEnv which is another 200 MB, but you can delete its folder manually to remove it if you like.) `echo $'\n> '`" REMOVEFILES
 if [ $REMOVEFILES = "y" ] || [ $REMOVEFILES = "Y" ]; then
     rm -rf app.dist/ app.build/
