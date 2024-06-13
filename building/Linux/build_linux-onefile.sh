@@ -10,7 +10,7 @@ echo "Building with Nuitka ..."
 python -m nuitka app.py \
   --standalone \
   --onefile \
-  --follow-imports \
+  #--follow-imports \
   --show-modules \
   --assume-yes-for-downloads \
   --enable-plugin=pyside6 \
