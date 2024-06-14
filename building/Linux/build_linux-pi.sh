@@ -89,9 +89,9 @@ sudo chmod +x build_linux.sh
 ./build_linux.sh # modify nuitka build parameters here
 
 # Zip Artemis build folder for distribution
-7z a -tzip -r Artemis-Linux-arm64-${ARTEMISVER}.zip app.dist\*
+zip -r Artemis-Linux-arm64-${ARTEMISVER}.zip app.dist/*
 
-# Install Artemis 4 runtime dependencies (avoid "Segmentation fault" on run of "./app.bin")
+# Install Artemis 4 Pi runtime dependencies (avoid "Segmentation fault" on run of "./app.bin")
 sudo apt install -y libxcb-cursor0 libva-dev
 
 TEND=`date +%s` # Log the end time of the script
