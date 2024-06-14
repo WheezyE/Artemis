@@ -73,7 +73,7 @@ fi
 
 ##################### Build Artemis from Repo using Pyenv #####################
 # Clone Artemis repo
-sudo apt install -y git p7zip-full
+sudo apt install -y git
 git clone https://github.com/AresValley/Artemis.git
 cd Artemis
 
@@ -85,7 +85,7 @@ sudo apt install -y ccache # re-compilation of identical code in nuitka
 pyenv activate ${BUILDENV}
 cp building/Linux/build_linux.sh .
 sudo chmod +x build_linux.sh
-./build_linux.sh # modify nuitka build parameters here
+./build_linux.sh # can modify nuitka build parameters here
 
 # Zip Artemis build folder for distribution
 zip -r Artemis-Linux-arm64-${ARTEMISVER}.zip app.dist/*
