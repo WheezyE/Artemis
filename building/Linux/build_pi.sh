@@ -8,9 +8,9 @@
 # Description: Install pyenv so we can build Artemis from a fresh virtual Python (apart from any System Python setup which might be configured to run part of a Linux OS)
 
 clear
-echo "======= Build Artemis for Linux ======="
+echo "======= Build Artemis for Pi ======="
 echo ""
-echo "This script will help you build distributable Artemis executable binaries for Linux."
+echo "This script will help you build distributable Artemis executable binaries for Pi."
 echo ""
 echo "We will prepare a virtual python environment, download the Artemis repo, then make your Artemis binary."
 echo ""
@@ -28,7 +28,7 @@ TSTART=`date +%s` # log this script's start time
 
 # Pre-run stuff
 exec > >(tee "${DIR}/build_linux-pyenv_debug.log") 2>&1 # logging
-sudo apt update -y && sudo apt upgrade -y
+sudo apt-get update -y && sudo apt-get upgrade -y
 
 ################################ Install PyEnv ################################
 if hash pyenv 2>/dev/null; then
@@ -49,7 +49,7 @@ else
 fi
 
 # Install some Python deps & build packages
-sudo apt install -y make build-essential libssl-dev zlib1g-dev \
+sudo apt-get install -y make build-essential libssl-dev zlib1g-dev \
 libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
 libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev openssl # to-do: see which packages aren't needed anymore
 
@@ -73,13 +73,13 @@ fi
 
 ##################### Build Artemis from Repo using Pyenv #####################
 # Clone Artemis repo
-sudo apt install -y git
+sudo apt-get install -y git
 git clone https://github.com/AresValley/Artemis.git
 cd Artemis
 
 # Install some nuitka dependencies
-sudo apt install -y patchelf # needed for '--standalone' build in nuitka
-sudo apt install -y ccache # re-compilation of identical code in nuitka
+sudo apt-get install -y patchelf # needed for '--standalone' build in nuitka
+sudo apt-get install -y ccache # re-compilation of identical code in nuitka
 
 # Build Artemis from source
 pyenv activate ${BUILDENV}
@@ -91,7 +91,7 @@ sudo chmod +x build_linux.sh
 zip -r Artemis-Linux-arm64-${ARTEMISVER}.zip app.dist/*
 
 # Install Artemis 4 Pi runtime dependencies (avoid "Segmentation fault" on run of "./app.bin")
-sudo apt install -y libxcb-cursor0 libva-dev
+sudo apt-get install -y libxcb-cursor0 libva-dev
 
 TEND=`date +%s` # Log the end time of the script
 TTOTAL=$((TEND-TSTART))
