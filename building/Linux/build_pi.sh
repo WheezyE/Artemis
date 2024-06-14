@@ -23,7 +23,7 @@ ARTEMISVER='4.0.3'
 
 # Static variables
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # Store current location of this bash script
-BUILDENV="artemis3_python"$PYTHVER
+BUILDENV="artemis${ARTEMISVER}_python${PYTHVER}"
 TSTART=`date +%s` # log this script's start time
 
 # Pre-run stuff
