@@ -1,20 +1,19 @@
 #!/bin/bash
 
-### Build Artemis for Linux within PyEnv (for systems like the Raspberry Pi)
-# build_linux-pyenv.sh
+### Run build_linux.sh within a PyEnv (for systems like the Raspberry Pi)
+# build_pi.sh
 # Author: Eric (KI7POL)
 # Credits: MarcoDT (testing, trouble-shooting, guidance).  Keith (N7ACW) (inspiration).  Jason (KM4ACK) (inspiration).
-# Version: 0.2 (June 10, 2024)
+# Version: 0.2 (June 13, 2024)
 # Description: Install pyenv so we can build Artemis from a fresh virtual Python (apart from any System Python setup which might be configured to run part of a Linux OS)
-# Details: We might need to install Artemis' pip requirements on a system that uses Python to run its OS.  To build an Artemis binary, we should build within a fresh python virtual environment.
 
 clear
 echo "======= Build Artemis for Linux ======="
-echo
+echo ""
 echo "This script will help you build distributable Artemis executable binaries for Linux."
-echo
+echo ""
 echo "We will prepare a virtual python environment, download the Artemis repo, then make your Artemis binary."
-echo
+echo ""
 read -n 1 -s -r -p "Press any key to continue ..."
 clear
 
@@ -31,7 +30,7 @@ TSTART=`date +%s` # log this script's start time
 exec > >(tee "${DIR}/build_linux-pyenv_debug.log") 2>&1 # logging
 sudo apt update -y && sudo apt upgrade -y
 
-######################################### Install PyEnv #########################################
+################################ Install PyEnv ################################
 if hash pyenv 2>/dev/null; then
     echo "Pyenv is already installed, skipping pyenv installation..." >&2
 else
@@ -72,7 +71,7 @@ else
     echo "A virtual environment with Python ${PYTHVER} named ${BUILDENV} was found. We will install pip modules here..."
 fi
 
-###################################### Build Artemis from Repo using Pyenv ######################################
+##################### Build Artemis from Repo using Pyenv #####################
 # Clone Artemis repo
 sudo apt install -y git p7zip-full
 git clone https://github.com/AresValley/Artemis.git
@@ -98,7 +97,7 @@ TEND=`date +%s` # Log the end time of the script
 TTOTAL=$((TEND-TSTART))
 echo "(Script completed in ${TTOTAL} seconds)" # Report how long it took to install requirements and build Artemis
 
-######################################### Clean Up #########################################
+################################## Clean Up ###################################
 pyenv deactivate # pyenv virtualenv can also be deactivated by closing the terminal window
 
 read -p "Would you like to remove the build pre-requisites we installed? (y/n) `echo $'\n '`(Removing these files will free up about 200 MB, but keeping the files will make re-running this script take much less time.  We will not delete PyEnv which is another 200 MB, but you can delete its folder manually to remove it if you like.) `echo $'\n> '`" REMOVEFILES
@@ -107,9 +106,10 @@ if [ ${REMOVEFILES} = "y" ] || [ ${REMOVEFILES} = "Y" ]; then
     rm -rf ${HOME}/.pyenv/versions/${BUILDENV}/ ${HOME}/.pyenv/versions/${PYTHVER}/envs/${BUILDENV}/
 fi
 
-######################################### Notes #########################################
-# Last built successfully on RPi4 (bookworm aarch64, kernel 6.6.31+rpt-rpi-v8, gcc-11 & gcc-12, python 3.11.0 installed within pyenv).
-# Can build in nuitka with --onefile or as directory
+#################################### Notes ####################################
+# Last built successfully on RPi4 (bookworm aarch64 kernel 6.6.31+rpt-rpi-v8, gcc-11 & gcc-12, python 3.11.0 within pyenv).
+# Can also pass --onefile argument to nuitka by editing build_linux.sh
+
 ### Other commands
 #python -V # You can test which version of python has priority now on your system if you like
 #python -m test # You can run python diagnostics if you want to check the integrity an installed python.  Testing Python 3.7.0 on Pi3B+ took 56 minutes and resulted in a "== Tests result: FAILURE == ... 6 tests failed: test_asyncio test_ftplib test_imaplib test_nntplib test_poplib test_ssl" but Artemis 3.2.0 build still worked.
