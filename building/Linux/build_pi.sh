@@ -19,15 +19,16 @@ clear
 
 # >>>>>>>> User-defined variables <<<<<<<<
 PYTHVER='3.11.0' # Python version to install within PyEnv. Nuitka might fail to build Artemis with newer versions of python.
-ARTEMISVER='4.0.3'
+ARTEMISVER='4.0.5'
 
 # Static variables
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # Store current location of this bash script
+THISDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # Store current location of this bash script
+REPODIR=$( cd ../.. && pwd )
 BUILDENV="artemis${ARTEMISVER}_python${PYTHVER}"
 TSTART=`date +%s` # log this script's start time
 
 # Pre-run stuff
-exec > >(tee "${DIR}/build_linux-pyenv_debug.log") 2>&1 # logging
+exec > >(tee "${THISDIR}/build_linux-pyenv_debug.log") 2>&1 # logging
 sudo apt-get update -y && sudo apt-get upgrade -y
 
 ################################ Install PyEnv ################################
@@ -72,23 +73,15 @@ else
 fi
 
 ##################### Build Artemis from Repo using Pyenv #####################
-# Clone Artemis repo
-sudo apt-get install -y git
-git clone https://github.com/AresValley/Artemis.git
-cd Artemis
-
-# Install some nuitka dependencies
-sudo apt-get install -y patchelf # needed for '--standalone' build in nuitka
-sudo apt-get install -y ccache # re-compilation of identical code in nuitka
-
 # Build Artemis from source
+sudo apt-get install -y patchelf ccache # nuitka dependencies: needed for '--standalone' build & speeding up re-compilation
 pyenv activate ${BUILDENV}
-cp building/Linux/build_linux.sh .
-sudo chmod +x build_linux.sh
-./build_linux.sh # can modify nuitka build parameters here
+cp ./build_linux.sh ${REPODIR}/build_linux.sh
+sudo chmod +x ${REPODIR}/build_linux.sh
+${REPODIR}/./build_linux.sh # can modify nuitka build parameters here
 
 # Zip Artemis build folder for distribution
-zip -r Artemis-Linux-arm64-${ARTEMISVER}.zip app.dist/*
+zip -r ${REPODIR}/Artemis-Linux-arm64-${ARTEMISVER}.zip ${REPODIR}/app.dist/*
 
 # Install Artemis 4 Pi runtime dependencies (avoid "Segmentation fault" on run of "./app.bin")
 sudo apt-get install -y libxcb-cursor0 libva-dev
@@ -100,9 +93,9 @@ echo "(Script completed in ${TTOTAL} seconds)" # Report how long it took to inst
 ################################## Clean Up ###################################
 pyenv deactivate # pyenv virtualenv can also be deactivated by closing the terminal window
 
-read -p "Would you like to remove the build pre-requisites we installed? (y/n) `echo $'\n '`(Removing these files will free up about 200 MB, but keeping the files will make re-running this script take much less time.  We will not delete PyEnv which is another 200 MB, but you can delete its folder manually to remove it if you like.) `echo $'\n> '`" REMOVEFILES
+read -p "Would you like to remove the build files and python build environment we installed? (y/n) `echo $'\n '`(Removing these will free up about 200 MB, but keeping these will make re-running this script much faster.  We will not delete PyEnv which is another 200 MB, but you can delete its folder manually to remove it if you like.) `echo $'\n> '`" REMOVEFILES
 if [ ${REMOVEFILES} = "y" ] || [ ${REMOVEFILES} = "Y" ]; then
-    rm -rf app.dist/ app.build/
+    rm -rf ${REPODIR}/app.dist/ ${REPODIR}/app.build/ ${REPODIR}/app.bin ${REPODIR}/build_linux.sh
     rm -rf ${HOME}/.pyenv/versions/${BUILDENV}/ ${HOME}/.pyenv/versions/${PYTHVER}/envs/${BUILDENV}/
 fi
 
