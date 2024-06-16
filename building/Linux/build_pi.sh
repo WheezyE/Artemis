@@ -8,12 +8,7 @@
 # Description: Install pyenv so we can build Artemis from a fresh virtual Python (apart from any System Python setup which might be configured to run part of a Linux OS)
 
 clear
-echo "======= Build Artemis for Pi ======="
-echo ""
-echo "This script will help you build distributable Artemis executable binaries for Pi."
-echo ""
-echo "We will prepare a virtual python environment, download the Artemis repo, then make your Artemis binary."
-echo ""
+echo "This script will install pyenv, a python virtual environment, and build an Artemis binary."
 read -n 1 -s -r -p "Press any key to continue ..."
 clear
 
@@ -37,17 +32,17 @@ if hash pyenv 2>/dev/null; then
 else
     echo "Installing pyenv now..." >&2
     curl https://pyenv.run | bash
-    # Initialize Pyenv whenever shell is loaded
+    # Initialize Pyenv whenever termianl is opened in the future
     sudo echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
     sudo echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
     sudo echo 'eval "$(pyenv init -)"' >> ~/.bashrc
     sudo echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bashrc
-    # Also initialize Pyenv for this instance of shell 
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
 fi
+# Initialize Pyenv for this script (required for scripts even if already in ~/.bashrc)
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
 
 # Install some Python deps & build packages
 sudo apt-get install -y make build-essential libssl-dev zlib1g-dev \
@@ -69,7 +64,7 @@ if ! [ -d "/${HOME}/.pyenv/versions/${PYTHVER}/envs/${BUILDENV}" ]; then
     pyenv activate ${BUILDENV}
     python -m pip install --upgrade pip # upgrade pip
 else
-    echo "A virtual environment with Python ${PYTHVER} named ${BUILDENV} was found. We will install pip modules here..."
+    echo "A virtual environment with Python ${PYTHVER} named ${BUILDENV} was found. We will configure this and build Artemis from here..."
 fi
 
 ##################### Build Artemis from Repo using Pyenv #####################
