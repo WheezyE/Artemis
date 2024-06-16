@@ -31,8 +31,9 @@ Window {
     signal showCatManager()
     signal openSigEditor(string type, var sig_param, bool is_new)
     signal showSpaceWeather()
-    signal checkDbUpdates()
-    signal startDownloader()
+    signal checkForUpdate()
+    signal updateDb()
+    signal updateArtemis()
     signal openDbDirectory()
     signal newDb(string name)
     signal exportDb(string path)
@@ -121,11 +122,12 @@ Window {
         dialogDownloadDb.open()
     }
 
-    function openDialogDownloadArtemis(messageType, title, message) {
-        dialogDownloadArtemis.messageType = messageType
-        dialogDownloadArtemis.title = title
-        dialogDownloadArtemis.message = message
-        dialogDownloadArtemis.open()
+    function openDialogUpdateArtemis(messageType, title, message, auto) {
+        dialogUpdateArtemis.messageType = messageType
+        dialogUpdateArtemis.title = title
+        dialogUpdateArtemis.message = message
+        dialogUpdateArtemis.autoUpdate = auto
+        dialogUpdateArtemis.open()
     }
 
     DialogMessage {
@@ -135,18 +137,24 @@ Window {
         standardButtons: Dialog.Cancel | Dialog.Yes
 
         onAccepted: {
-            startDownloader()
+            updateDb()
         }
     }
 
     DialogMessage {
-        id: dialogDownloadArtemis
+        id: dialogUpdateArtemis
         modal: true
+
+        property bool autoUpdate
 
         standardButtons: Dialog.Cancel | Dialog.Yes
 
         onAccepted: {
-            Qt.openUrlExternally("https://github.com/AresValley/Artemis")
+            if (autoUpdate) {
+                updateArtemis();
+            } else {
+                Qt.openUrlExternally("https://github.com/AresValley/Artemis");
+            }
         }
     }
 
@@ -217,6 +225,11 @@ Window {
         anchors.fill: parent
         leftPadding: 10
         bottomPadding: 10
+
+        focus: true
+
+        Keys.onDownPressed: listView.incrementCurrentIndex()
+        Keys.onUpPressed: listView.decrementCurrentIndex()
 
         header: MenuBar {
             id: topBar
@@ -315,7 +328,7 @@ Window {
 
                 MenuItem {
                     text: "Check for Updates"
-                    onClicked: {checkDbUpdates()}
+                    onClicked: {checkForUpdate()}
                 }
 
                 MenuSeparator {}
@@ -389,7 +402,6 @@ Window {
                         Layout.fillHeight: true
                         highlightMoveDuration: 0
                         clip: true
-                        focus: true
                         ScrollBar.vertical: bar
                         highlight: Rectangle { color: Material.accent; radius: 5 }
                         onCurrentIndexChanged: { itemChangedList() }

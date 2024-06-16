@@ -6,7 +6,6 @@ from PySide6.QtCore import QObject, Signal, Slot
 from artemis.utils.path_utils import DATA_DIR
 from artemis.utils.generic_utils import *
 from artemis.utils.sql_utils import ArtemisDatabase
-from artemis.utils.constants import Constants
 from artemis.utils.sys_utils import delete_dir
 
 
@@ -49,8 +48,24 @@ class UIdbmanager(QObject):
     def load_local_db_list(self):
         """ Scan for all the valid DBs in the data folder and show them on the list
         """
+        db_param = []
         valid_db_list = self.scan_db_dir()
-        self.populate_db_list.emit(valid_db_list)
+
+        for db in valid_db_list:
+            db_param.append(
+                {
+                    'name': db.name,
+                    'version': db.version,
+                    'date': parse_date(db.date),
+                    'db_dir_name': db.db_dir_name,
+                    'documents_n': db.stats['documents'],
+                    'signals_n': db.stats['signals'],
+                    'images_n': db.stats['images'],
+                    'audio_n': db.stats['audio']
+                }
+            )
+
+        self.populate_db_list.emit(db_param)
 
 
     def load_db(self, db_dir_name):
@@ -85,43 +100,32 @@ class UIdbmanager(QObject):
 
     def scan_db_dir(self):
         """ Scans the data directory for valid databases and
-            return a dictionary containing only the valid ones with a summary
+            return a dictionary containing only the valid ones.
+            Returns a list of objects (dbs)
         """
         valid_db_list = []
         db_dirs = next(os.walk(DATA_DIR))[1]
 
         for db_dir_name in db_dirs:
-            if self._valid_db(db_dir_name):
+            try:
                 database = ArtemisDatabase(db_dir_name)
                 database.load()
-                valid_db_list.append(
-                    {
-                        'name': database.name,
-                        'db_dir_name': database.db_dir_name,
-                        'documents_n': database.stats['documents'],
-                        'signals_n': database.stats['signals'],
-                        'images_n': database.stats['images'],
-                        'audio_n': database.stats['audio']
-                    }
-                )
+                valid_db_list.append(database)
+            except:
+                continue
 
         return valid_db_list
 
 
-    def _valid_db(self, db_dir_name):
-        """ Checks if db_dir_name is a valid db dir containing a `data.sqlite` file.
-            Db must be valid as well and should be properly initialized and loaded with
-            no errors.
-
-        Args:
-            db_dir_name (str): name of the db folder
+    def get_latest_local_sigid_db(self):
+        """ Return the newest valid local sigID database.
+            Returns None if no valid sigID database is found.
         """
-        if os.path.exists(DATA_DIR / db_dir_name / Constants.SQL_NAME):
-            try:
-                database = ArtemisDatabase(db_dir_name)
-                database.load()
-                return True
-            except:
-                return False        # Invalid or corrupted DB
+        valid_dbs = self._parent.dbmanager.scan_db_dir()
+        sig_id_dbs = [db for db in valid_dbs if db.editable == -1]
+
+        if len(sig_id_dbs) != 0:
+            sig_id_latest = max(sig_id_dbs, key=lambda x: x.version)
+            return sig_id_latest
         else:
-            return False            # The dir is not containing a data.sqlite file
+            return None

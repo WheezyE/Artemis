@@ -7,8 +7,8 @@ from datetime import datetime
 from contextlib import closing
 
 from artemis.utils.constants import Query, Constants
-from artemis.utils.path_utils import DATA_DIR
 from artemis.utils.generic_utils import format_frequency
+from artemis.utils.path_utils import DATA_DIR
 
 
 class Database():
@@ -141,7 +141,7 @@ class ArtemisDatabase(Database):
         """ Create new db in the data folder.
             The name of folder containing the new db has a unique id as name (db_dir_name).
         """
-        meta = [name, datetime.now(), 0, 0]
+        meta = [name, datetime.now(), 1, 1]
         os.makedirs(self.db_dir)
         os.makedirs(self.media_dir)
 

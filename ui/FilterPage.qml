@@ -301,11 +301,12 @@ Page {
 
                     Label {
                         id: summaryFreq
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
                         color: Material.color(Material.Green)
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        font.pointSize: 16
                     }
                 }
             }
@@ -390,11 +391,12 @@ Page {
                     }
                     Label {
                         id: summaryBand
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
                         color: Material.color(Material.Green)
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        font.pointSize: 16
                     }
                 }
             }
@@ -465,11 +467,12 @@ Page {
                     }
                     Label {
                         id: summaryACF
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
                         color: Material.color(Material.Green)
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        font.pointSize: 16
                     }
                 }
             }
@@ -503,7 +506,6 @@ Page {
                         Layout.fillHeight: true
                         highlightMoveDuration: 0
                         clip: true
-                        focus: true
                         ScrollBar.vertical: ScrollBar {
                             active: true
                         }
@@ -555,7 +557,6 @@ Page {
                         Layout.fillWidth: true
                         highlightMoveDuration: 0
                         clip: true
-                        focus: true
                         ScrollBar.vertical: ScrollBar {
                             active: true
                         }
@@ -607,7 +608,6 @@ Page {
                         Layout.fillWidth: true
                         highlightMoveDuration: 0
                         clip: true
-                        focus: true
                         ScrollBar.vertical: ScrollBar {
                             active: true
                         }

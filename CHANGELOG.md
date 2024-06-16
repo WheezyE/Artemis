@@ -5,6 +5,25 @@
 
 ## [Unreleased]
 
+## [4.0.5] - 2024-06-15
+
+### Added
+- Possibility to navigate Artemis just with the keyboard [#50](https://github.com/AresValley/Artemis/issues/50)
+- **Windows:** automatic updates have been implemented. When a software update is available, Artemis will download the new version and install the updates automatically 
+- Multiple sigID databases can be conserved. In the case of autoload, the latest local version will be loaded
+- Added creation date and DB version in DB manager window
+
+### Changed
+- Improved readability of labels for filter ranges for frequency, bandwidth, and ACF
+- Improved Update manager and Downloader functionalities
+- OS-dependent temporary folders are now used for database download and Artemis updates
+- The logic for searching the last sigID database has changed now the discriminant is no longer the folder name but is reported as a signature in the database itself (-1 in the editable field; see documentation)
+- Old sigID databases are not deleted anymore when a new version is downloaded. This is to avoid removing databases with user changes or additions
+
+### Fixed
+- Added a database load check to avoid (noncritical) exceptions when applying filters without having loaded a database.
+- Fixed a potential issue involving the forcible closure of the downloader window, but the downloader instance keeps running
+- With the new logic in the latest sigID database search, manually imported sigID databases are officially recognized as proper ones
 
 ## [4.0.3] - 2024-06-10
 
@@ -101,7 +120,8 @@ First release.
 
 
 <!-- Links definitions -->
-[Unreleased]: https://github.com/AresValley/Artemis/compare/v4.0.3...HEAD
+[Unreleased]: https://github.com/AresValley/Artemis/compare/v4.0.5...HEAD
+[4.0.5]: https://github.com/AresValley/Artemis/compare/v4.0.3...v4.0.5
 [4.0.3]: https://github.com/AresValley/Artemis/compare/v4.0.1...v4.0.3
 [4.0.1]: https://github.com/AresValley/Artemis/compare/v3.2.4...v4.0.1
 [3.2.4]: https://github.com/AresValley/Artemis/compare/v3.2.1...v3.2.4
