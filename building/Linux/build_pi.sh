@@ -1,36 +1,35 @@
 #!/bin/bash
 
-### Run build_linux.sh within a PyEnv (for systems like the Raspberry Pi)
+### Runs the build_linux.sh script within a PyEnv (for OS's with a "System python" installation, like the Raspberry Pi)
 # build_pi.sh
 # Author: Eric (KI7POL)
-# Credits: MarcoDT (testing, trouble-shooting, guidance).  Keith (N7ACW) (inspiration).  Jason (KM4ACK) (inspiration).
-# Version: 0.2 (June 13, 2024)
-# Description: Install pyenv so we can build Artemis from a fresh virtual Python (apart from any System Python setup which might be configured to run part of a Linux OS)
+# Credits: MarcoDT (Artemis sourcecode, testing, guidance, encouragement).  Keith (N7ACW) (inspiration).
+# Version: 0.2 (June 17, 2024)
 
 clear
-echo "This script will install pyenv, a python virtual environment, and build an Artemis binary."
-read -n 1 -s -r -p "Press any key to continue ..."
-clear
+echo -e "This script installs pyenv, installs a python virtual environment into pyenv,\nthen builds an Artemis binary using build_linux.sh."
 
 # >>>>>>>> User-defined variables <<<<<<<<
-PYTHVER='3.11.0' # Python version to install within PyEnv. Nuitka might fail to build Artemis with newer versions of python.
-ARTEMISVER='4.0.5'
+PYTHVER='3.11.0' # Python version to install within PyEnv. Nuitka might fail to build Artemis with python > v3.11.
 
 # Static variables
-THISDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # Store current location of this bash script
-REPODIR=$( cd ../.. && pwd )
-BUILDENV="artemis${ARTEMISVER}_python${PYTHVER}"
+if [ $(pwd | grep -P "${HOME}/.*Artemis/building/Linux") ]; then
+    cd ../.. #if we are running this script from the "building/Linux/" directory then change to repo root directory instead
+fi
+REPODIR="$(pwd)" # Store current directory
+BUILDENV="artemis_python${PYTHVER}"
 TSTART=`date +%s` # log this script's start time
 
 # Pre-run stuff
-exec > >(tee "${THISDIR}/build_linux-pyenv_debug.log") 2>&1 # logging
-sudo apt-get update -y && sudo apt-get upgrade -y
+#exec > >(tee "${THISDIR}/build_linux-pyenv_debug.log") 2>&1 # logging
+export DEBIAN_FRONTEND=noninteractive  #don't ask for user input
+sudo apt-get -y update && sudo apt-get -y -o Dpkg::Options::="--force-confold" upgrade #upgrade silently and keep any old configs
 
 ################################ Install PyEnv ################################
 if hash pyenv 2>/dev/null; then
-    echo "Pyenv is already installed, skipping pyenv installation..." >&2
+    echo "Pyenv is already installed, skipping pyenv installation..."
 else
-    echo "Installing pyenv now..." >&2
+    echo "Installing pyenv now..."
     curl https://pyenv.run | bash
     # Initialize Pyenv whenever termianl is opened in the future
     sudo echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
@@ -58,25 +57,25 @@ else
 fi
 
 # Create our new Python 3.x.x virtual environment (activate before use)
-if ! [ -d "/${HOME}/.pyenv/versions/${PYTHVER}/envs/${BUILDENV}" ]; then
+if [ ! -d "${HOME}/.pyenv/versions/${PYTHVER}/envs/${BUILDENV}" ]; then
     echo "Creating a Python ${PYTHVER} virtual environment named ${BUILDENV} ..."
     pyenv virtualenv ${PYTHVER} ${BUILDENV}
     pyenv activate ${BUILDENV}
     python -m pip install --upgrade pip # upgrade pip
 else
-    echo "A virtual environment with Python ${PYTHVER} named ${BUILDENV} was found. We will configure this and build Artemis from here..."
+    echo -e "A virtual environment with Python ${PYTHVER} named ${BUILDENV}\nwas found on this system. We will configure this and build Artemis from here.\nIf Artemis build fails, consider deleting this with\n\"rm -rf ${HOME}/.pyenv/versions/${PYTHVER}/envs/${BUILDENV}\" ..."
 fi
 
 ##################### Build Artemis from Repo using Pyenv #####################
-# Build Artemis from source
+# Activate pyenv build environment
 sudo apt-get install -y patchelf ccache # nuitka dependencies: needed for '--standalone' build & speeding up re-compilation
 pyenv activate ${BUILDENV}
-cp ./build_linux.sh ${REPODIR}/build_linux.sh
-sudo chmod +x ${REPODIR}/build_linux.sh
-${REPODIR}/./build_linux.sh # can modify nuitka build parameters here
 
-# Zip Artemis build folder for distribution
-zip -r ${REPODIR}/Artemis-Linux-arm64-${ARTEMISVER}.zip ${REPODIR}/app.dist/*
+# Build Artemis from source
+cd ${REPODIR}
+echo "Current directory is:" $(pwd)
+sudo chmod +x building/Linux/build_linux.sh
+building/Linux/./build_linux.sh # can modify nuitka build parameters here
 
 # Install Artemis 4 Pi runtime dependencies (avoid "Segmentation fault" on run of "./app.bin")
 sudo apt-get install -y libxcb-cursor0 libva-dev
@@ -88,15 +87,24 @@ echo "(Script completed in ${TTOTAL} seconds)" # Report how long it took to inst
 ################################## Clean Up ###################################
 pyenv deactivate # pyenv virtualenv can also be deactivated by closing the terminal window
 
-read -p "Would you like to remove the build files and python build environment we installed? (y/n) `echo $'\n '`(Removing these will free up about 200 MB, but keeping these will make re-running this script much faster.  We will not delete PyEnv which is another 200 MB, but you can delete its folder manually to remove it if you like.) `echo $'\n> '`" REMOVEFILES
-if [ ${REMOVEFILES} = "y" ] || [ ${REMOVEFILES} = "Y" ]; then
-    rm -rf ${REPODIR}/app.dist/ ${REPODIR}/app.build/ ${REPODIR}/app.bin ${REPODIR}/build_linux.sh
+read -t 5 -rep $'\nRemove the python build environment & cached build files? (y/n - default n)\n(~200 MB of cached files make future builds faster)' REMOVEFILES
+if [ "${REMOVEFILES}" = "y" ] || [ "${REMOVEFILES}" = "Y" ]; then
+    rm -rf ${REPODIR}/app.dist/ ${REPODIR}/app.build/ ${REPODIR}/app.bin
     rm -rf ${HOME}/.pyenv/versions/${BUILDENV}/ ${HOME}/.pyenv/versions/${PYTHVER}/envs/${BUILDENV}/
+fi
+
+read -t 5 -rep $'\nRemove pyenv? (y/n - default n)' REMOVEPYENV
+if [ "${REMOVEPYENV}" = "y" ] || [ "${REMOVEPYENV}" = "Y" ]; then
+    rm -rf ${HOME}/.pyenv/
+    echo "You may also wish to remove these lines from your ~/.bashrc file:"
+    echo '    export PYENV_ROOT="$HOME/.pyenv"'
+    echo '    export PATH="$PYENV_ROOT/bin:$PATH"'
+    echo '    eval "$(pyenv init -)"'
+    echo '    eval "$(pyenv virtualenv-init -)"'
 fi
 
 #################################### Notes ####################################
 # Last built successfully on RPi4 (bookworm aarch64 kernel 6.6.31+rpt-rpi-v8, gcc-11 & gcc-12, python 3.11.0 within pyenv).
-# Can also pass --onefile argument to nuitka by editing build_linux.sh
 
 ### Other commands
 #python -V # You can test which version of python has priority now on your system if you like

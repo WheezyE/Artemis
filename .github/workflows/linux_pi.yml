@@ -1,0 +1,27 @@
+name: Nuitka - Self-hosted Pi4
+
+on:
+  workflow_dispatch:
+    inputs:
+      artemis_version:
+        description: 'Version'
+        required: true
+        default: '4.0.0'
+        type: string
+
+jobs:
+  build-pi-arm64:
+    runs-on: self-hosted
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Build and package
+        run: bash ./building/Linux/build_pi.sh
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Artemis-Linux-arm64-${{github.event.inputs.artemis_version}}
+          path: ./app.dist/
